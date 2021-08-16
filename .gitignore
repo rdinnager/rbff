@@ -48,6 +48,6 @@ src/*/*.so
 src/*/*.dll
 src/Makevars
 
-configure.status
-configure.log
+config.status
+config.log
 autom4te.cache/
