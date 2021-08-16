@@ -1,0 +1,16 @@
+# Default make file
+PKG_CPPFLAGS=-I/usr/include/suitesparse -I/home/rdinnager/Projects/rbff/src/linear-algebra -I/home/rdinnager/Projects/rbff/src/project -I/home/rdinnager/Projects/rbff/src/mesh -I/home/rdinnager/Projects/rbff/src/rectangle-bin-pack
+PKG_LIBS=$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -lcholmod
+
+# Include all C++ files in src/ and its subdirectories: 
+SOURCES=code.cpp @SUBDIR_SOURCES@
+
+# Obtain the object files
+OBJECTS=$(SOURCES:.cpp=.o) 
+
+# Make the shared object
+all: $(SHLIB)
+
+# Provide recipe to remove all objects
+clean:
+	@rm -f $(OBJECTS)
