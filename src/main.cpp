@@ -163,7 +163,7 @@ void auto_flatten(const std::string& inputPath,
   // set nCones to 8 for closed surfaces`
   for (int i = 0; i < model.size(); i++) {
     if (surfaceIsClosed[i] && !mapToSphere && nCones < 3) {
-      std::cout << "Setting nCones to 8." << std::endl;
+      Rcout << "Setting nCones to 8." << std::endl;
       nCones = 8;
     }
   }

@@ -1,6 +1,7 @@
 #include "Generators.h"
 #include <queue>
 #include <unordered_map>
+#include <Rcpp.h>
 
 namespace bff {
 
@@ -135,7 +136,7 @@ EdgeIter Generators::sharedEdge(VertexCIter u, VertexCIter v)
 		he = he->flip()->next();
 	} while (he != u->halfEdge());
 
-	std::cerr << "Code should not reach here!" << std::endl;
+	Rcpp::Rcerr << "Code should not reach here!" << std::endl;
 	return he->edge();
 }
 

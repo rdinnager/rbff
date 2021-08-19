@@ -7,6 +7,7 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/rdinnager/rbff/workflows/R-CMD-check/badge.svg)](https://github.com/rdinnager/rbff/actions)
 <!-- badges: end -->
 
 The goal of rbff is to provide an R wrapper around the awesome
