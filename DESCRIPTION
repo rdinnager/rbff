@@ -17,4 +17,15 @@ RoxygenNote: 7.1.1
 LinkingTo: 
     Rcpp
 Imports: 
-    Rcpp
+    rgl,
+    Rcpp,
+    sf,
+    Rvcg,
+    readobj,
+    colourvalues
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)

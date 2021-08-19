@@ -1,0 +1,64 @@
+---
+title: "rbff_intro"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rbff_intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(rgl)
+setupKnitr(autoprint = TRUE)
+```
+
+Welcome to the `rbff` R package. `rbff` is an R wrapper around the [boundary-first-flattening](https://geometrycollective.github.io/boundary-first-flattening/) (BFF) software developed by Rowan Sawhney based on a method by Rowan Sawhney and Keenan Crane. It is designed to take a 3d object defined as a mesh and 'flatten' it into a 2d mesh (or map to a sphere), whilst minimizing angle and area distortion. This can be used for all sorts of interesting applications like texture mapping, painting on 3d surfaces, and generating representations of 3d objects suitable for machine learning algorithms (e.g. those that have been developed for 2d (or spherical) applications, here is just one [example](https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.14094) I like). To demonstrate how the package works we will use some 3d meashes included with the package. let's start by loading up a 3d human face, and start flattening it!
+
+```{r setup}
+library(rbff)
+library(rgl)
+
+data(face)
+
+## what does it look like? Use the rgl package to view
+shade3d(face, col = "#A15C33")
+rglwidget()
+```
+
+The first thing we can try is flatten the face automatically, using the `bff_flatten()` function. This function tries to flatten the mesh without too much guidance from the user, but minimizing area distortion. Using the default arguments, let's see what it produces.
+
+```{r try_auto}
+
+face_flat <- bff_flatten(face)
+
+bff_vis_metrics(face_flat, "mesh")
+rglwidget() 
+
+```
+
+```{r try2}
+square <- matrix(c(0, 1, 1, 0, 0,
+                   0, 0, 1, 1, 0), ncol = 2)
+
+temp_obj <- tempfile(fileext = ".obj")
+rbff::flatten_to_shape(system.file("extdata", "face.obj", package = "rbff"),
+                       square,
+                       normalizeUVs = TRUE,
+                       temp_obj)
+
+test <- rgl::readOBJ(temp_obj)
+
+plot(t(test$texcoords), asp = 1)
+
+```
+
+```{r testing}
+
+```
+
+
+

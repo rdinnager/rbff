@@ -16,3 +16,75 @@ NULL
 #' @importFrom Rcpp sourceCpp
 ## usethis namespace: end
 NULL
+
+#' Beetle 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"beetle"
+
+#' Box 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"box"
+
+#' Bunny 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"bunny"
+
+#' Cowhead 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"cowhead"
+
+#' Face 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"face"
+
+#' Fish 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"fish"
+
+#' Hemisphere 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"hemisphere"
+
+#' Kitten 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"kitten"
+
+#' Maze 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"maze"
+
+#' Punctured Torus 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"punctured_torus"
+
+#' Spothead 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"spothead"
+
+#' Teapot 3d Model
+#' 
+#' @format A `mesh3d` object.
+#' @source \url{https://github.com/GeometryCollective/boundary-first-flattening/tree/master/input}
+"teapot"

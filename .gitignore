@@ -51,3 +51,4 @@ src/Makevars
 config.status
 config.log
 autom4te.cache/
+inst/doc
