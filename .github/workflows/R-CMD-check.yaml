@@ -54,6 +54,16 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
 
+      - name: Install SuiteSparse (on linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt install libsuitesparse-dev
+
+      - name: Install SuiteSparse (on macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install suite-sparse
+
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
