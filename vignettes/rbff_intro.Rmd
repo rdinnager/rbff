@@ -26,7 +26,7 @@ data(face)
 
 ## what does it look like? Use the rgl package to view
 shade3d(face, col = "#A15C33")
-rglwidget()
+
 ```
 
 The first thing we can try is flatten the face automatically, using the `bff_flatten()` function. This function tries to flatten the mesh without too much guidance from the user, but minimizing area distortion. Using the default arguments, let's see what it produces.
