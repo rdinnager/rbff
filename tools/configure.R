@@ -1,15 +1,31 @@
 OS <- commandArgs(TRUE)
 
-win_other_places <- c("C:/msys64/mingw64/include",
-                      "C:/msys64/mingw32/include",
-                      "C:/msys64/clang64/include",
-                      "C:/msys64/clang32/include")
+rtools_home <- Sys.getenv("RTOOLS40_HOME")
+r_arch <- switch(Sys.getenv("R_ARCH"),
+                 `/i386` = "32",
+                 `/x64` = "64")
 
-find_suitesparse <- function() {
+R_BIN <- file.path(R.home("bin"), "R.exe")
+
+# Find compiler
+CC <- system2(R_BIN, c("CMD", "config", "CC"), stdout = TRUE)
+CFLAGS <- system2(R_BIN, c("CMD", "config", "CFLAGS"), stdout = TRUE)
+CPPFLAGS <- system2(R_BIN, c("CMD", "config", "CPPFLAGS"), stdout = TRUE)
+
+
+win_other_places <- suppressWarnings(normalizePath(c(paste0("C:/msys", r_arch, c("/mingw", "/clang"), r_arch, "/include"),
+                      paste0(rtools_home, c("/mingw", "/clang"), r_arch, "/include")),
+                      winslash = "/"))
+
+find_header <- function(header, subdir) {
   if(Sys.which("cpp") != "") {
-    cpp_search <- system2("cpp", "-v", TRUE, TRUE, timeout = 5)
+
+    cpp_search <- switch(OS,
+                         win = system2("cpp", c("-v", "nul"), TRUE, TRUE, timeout = 5),
+                         nowin = system2("cpp", c("-v", "/dev/null"), TRUE, TRUE, timeout = 5))
     start <- which(cpp_search == "#include <...> search starts here:")
     end <- which(cpp_search == "End of search list.")
+    #print(cpp_search)
     if((end - start) > 0) {
       paths <- cpp_search[(start + 1L):
                             (end - 1L)]
@@ -18,8 +34,6 @@ find_suitesparse <- function() {
     }
     if(paths[1] != "") {
       paths <- gsub(" ", "", paths)
-      paths <- c(file.path(paths, "suitesparse", "cholmod.h"),
-                 file.path(paths, "cholmod.h"))
     }
   } else {
     paths <- ""
@@ -28,15 +42,20 @@ find_suitesparse <- function() {
   PATH <- switch(OS,
                  win = c(strsplit(Sys.getenv("PATH"), ";")[[1]], win_other_places),
                  nowin = strsplit(Sys.getenv("PATH"), ":")[[1]])
-  paths <- c(paths, file.path(PATH, "cholmod.h"))
+  paths <- c(paths, PATH)
+  paths <- suppressWarnings(normalizePath(paths, winslash = "/"))
+  paths <- c(file.path(paths, subdir, header),
+             file.path(paths, header))
+
+  print(paths)
 
   here <- sapply(paths, file.exists)
   if(any(here)) {
-    SUITESPARSE_INCLUDE <- dirname(paths[here][1])
+    INCLUDE <- dirname(paths[here][1])
   } else {
-    SUITESPARSE_INCLUDE <- ""
+    INCLUDE <- ""
   }
-  SUITESPARSE_INCLUDE
+  INCLUDE
 
 }
 
@@ -59,13 +78,60 @@ if(SUITESPARSE_DIR != "") {
 } else {
   if(SUITESPARSE_INCLUDE == "") {
     message("Searching for SuiteSparse...")
-    SUITESPARSE_INCLUDE <- find_suitesparse()
-    if(SUITESPARSE_LIB == "") {
-      if(SUITESPARSE_INCLUDE != "") {
-        message("SuiteSparse found! Setting up directories...")
-        SUITESPARSE_LIB <- file.path(dirname(SUITESPARSE_INCLUDE), "lib")
-      }
+    SUITESPARSE_INCLUDE <- find_header("cholmod.h", "suitesparse")
+    if(SUITESPARSE_INCLUDE != "") {
+        message(paste0("SuiteSparse found at ", SUITESPARSE_INCLUDE))
     }
   }
 }
 
+if(OS == "win") {
+  if(OPENBLAS_DIR != "") {
+    message("OPENBLAS_DIR found, setting up directories...")
+    if(OPENBLAS_LIB == "") {
+      OPENBLAS_LIB <- file.path(OPENBLAS_DIR, "lib")
+    }
+    if(OPENBLAS_INCLUDE == "") {
+      OPENBLAS_LIB <- file.path(OPENBLAS_DIR, "include")
+    }
+  } else {
+    if(OPENBLAS_INCLUDE == "") {
+      message("Searching for OpenBLAS...")
+      OPENBLAS_INCLUDE <- find_header("cblas.h", "OpenBLAS")
+        if(OPENBLAS_INCLUDE != "") {
+          message(paste0("OpenBLAS found at ", OPENBLAS_INCLUDE))
+        }
+    }
+  }
+  pkg_l <- c("-lcholmod",
+             "-lopenblas",
+             "-lsuitesparseconfig",
+             "-lcolamd",
+             "-lamd",
+             "-fopenmp")
+} else {
+  pkg_l <- "-lcholmod"
+}
+
+## Test configuration
+
+writeLines("#include <cholmod.h>", suitesparse_test <- tempfile())
+test_suitesparse <- system2(CC, c(CPPFLAGS, CFLAGS,
+                                  "-E", "-xc", suitesparse_test),
+                            stderr = TRUE)
+writeLines("#include <cblas.h>", openblas_test <- tempfile())
+test_openblas <- system2(CC, c(CPPFLAGS, CFLAGS,
+                               "-E", "-xc", openblas_test),
+                         stderr = TRUE)
+
+if(!is.null(attr(suitesparse_test, "status"))) {
+  warning("Failed to find the suitesparse system library required for rbff")
+}
+
+if(SUITESPARSE_INCLUDE != ""){
+  INCLUDES <- paste0("-I", SUITESPARSE_INCLUDE)
+} else {
+
+}
+if(OPEN)
+LIBS <- paste(SUITESPARSE_LIB)
