@@ -12,7 +12,7 @@ punctured_torus <- readobj::read.obj(system.file("extdata", "punctured-torus.obj
 spothead <- readobj::read.obj(system.file("extdata", "spothead.obj", package = "rbff"), convert.rgl = TRUE)[[1]]
 teapot <- readobj::read.obj(system.file("extdata", "teapot.obj", package = "rbff"), convert.rgl = TRUE)[[1]]
 
-usethis::use_data(beetle, 
+usethis::use_data(beetle,
                   box,
                   bunny,
                   cowhead,
@@ -25,3 +25,6 @@ usethis::use_data(beetle,
                   spothead,
                   teapot,
                   overwrite = TRUE)
+
+download.file("https://www.r-project.org/logo/Rlogo.png", "/inst/extdata",
+              mode = "wb")

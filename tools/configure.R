@@ -125,7 +125,33 @@ test_openblas <- system2(CC, c(CPPFLAGS, CFLAGS,
                          stderr = TRUE)
 
 if(!is.null(attr(suitesparse_test, "status"))) {
-  warning("Failed to find the suitesparse system library required for rbff")
+  cat("
+------------------------- [ANTIANTICONF] ------------------------------
+* Failed to find the suitesparse system library required for rbff:    *
+* Try installing:                                                     *
+*     - deb: libsuitesparse-dev (Ubuntu, Debian, etc.)                *
+*     - rpm: suitesparse-devel (Fedora, EPEL)                         *
+*     - brew: suite-sparse                                            *
+*     - pacman (Windows): mingw-w64-{x86_64,i686}-suitesparse         *
+-----------------------------------------------------------------------
+    - If it still doesn't work you may have to specify the locations
+      of the 'include' and 'lib' directories manually using the
+      environmental variables SUITESPARSE_INCLUDE and SUITESPARSE_LIB.")
+}
+
+if(!is.null(attr(suitesparse_test, "status"))) {
+  cat("
+------------------------- [ANTIANTICONF] ------------------------------
+* Failed to find the OpenBLAS system library required for rbff:       *
+* Try installing:                                                     *
+*     - deb: libopenblas-dev (Ubuntu, Debian, etc.)                   *
+*     - rpm: openblas-devel (Fedora, EPEL)                            *
+*     - brew: openblas                                                *
+*     - pacman (Windows): mingw-w64-{x86_64,i686}-openblas            *
+-----------------------------------------------------------------------
+    - If it still doesn't work you may have to specify the locations
+      of the 'include' and 'lib' directories manually using the
+      environmental variables OPENBLAS_INCLUDE and OPENBLAS_LIB.")
 }
 
 if(SUITESPARSE_INCLUDE != ""){
