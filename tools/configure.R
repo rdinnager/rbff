@@ -5,7 +5,7 @@ r_arch <- switch(Sys.getenv("R_ARCH"),
                  `/i386` = "32",
                  `/x64` = "64")
 
-R_BIN <- file.path(R.home("bin"), "R.exe")
+R_BIN <- file.path(R.home("bin"), "R")
 
 # Find compiler
 CC <- system2(R_BIN, c("CMD", "config", "CC"), stdout = TRUE)
