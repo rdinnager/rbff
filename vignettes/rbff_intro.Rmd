@@ -40,16 +40,16 @@ rglwidget()
 
 ```
 
-```{r try2}
-square <- matrix(c(0, 1, 1, 0, 0,
-                   0, 0, 1, 1, 0), ncol = 2)
+So that is cool, but what can we do with it. Well, one simple thing is to use the flattened mesh to project a 2d image onto the original 3d mesh. We can place an image produced by R onto the 2d mesh using the `bff_place_image()` function which creates an interactive window that allows the user to slide and rotate the 2d mesh over the image. The image can be anything produced by an R expression, or else a png file can be specified. Here is the result of placing an image of the R logo on our face mesh:
 
-
-```
-
-```{r testing}
+```{r place_image}
 
 ```
 
+Let's try another model:
 
-
+```{r bunny}
+data(bunny)
+bunny_flat <- bff_flatten(bunny, n_cones = 8)
+bff_vis_metrics(bunny_flat, "area distortion")
+```

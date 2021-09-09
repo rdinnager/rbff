@@ -25,7 +25,7 @@ find_header <- function(header, subdir) {
                          nowin = system2("cpp", c("-v", "/dev/null"), TRUE, TRUE, timeout = 5))
     start <- which(cpp_search == "#include <...> search starts here:")
     end <- which(cpp_search == "End of search list.")
-    #print(cpp_search)
+
     if((end - start) > 0) {
       paths <- cpp_search[(start + 1L):
                             (end - 1L)]
@@ -46,8 +46,6 @@ find_header <- function(header, subdir) {
   paths <- suppressWarnings(normalizePath(paths, winslash = "/"))
   paths <- c(file.path(paths, subdir, header),
              file.path(paths, header))
-
-  print(paths)
 
   here <- sapply(paths, file.exists)
   if(any(here)) {
@@ -115,6 +113,8 @@ if(OS == "win") {
 
 ## Test configuration
 
+CPPFLAGS <- paste0(CPPFLAGS, " -I", OPENBLAS_INCLUDE, " -I", SUITESPARSE_INCLUDE)
+
 writeLines("#include <cholmod.h>", suitesparse_test <- tempfile())
 test_suitesparse <- system2(CC, c(CPPFLAGS, CFLAGS,
                                   "-E", "-xc", suitesparse_test),
@@ -139,7 +139,7 @@ if(!is.null(attr(suitesparse_test, "status"))) {
       environmental variables SUITESPARSE_INCLUDE and SUITESPARSE_LIB.")
 }
 
-if(!is.null(attr(suitesparse_test, "status"))) {
+if(!is.null(attr(test_openblas, "status"))) {
   cat("
 ------------------------- [ANTIANTICONF] ------------------------------
 * Failed to find the OpenBLAS system library required for rbff:       *
@@ -154,10 +154,22 @@ if(!is.null(attr(suitesparse_test, "status"))) {
       environmental variables OPENBLAS_INCLUDE and OPENBLAS_LIB.")
 }
 
-if(SUITESPARSE_INCLUDE != ""){
-  INCLUDES <- paste0("-I", SUITESPARSE_INCLUDE)
-} else {
+PKG_INCLUDES <- CPPFLAGS
+PKG_LIBS <- paste(pkg_l, collapse = " ")
 
+if(OPENBLAS_LIB != "") {
+  PKG_LIBS <- paste0(PKG_LIBS, " -L", OPENBLAS_LIB)
 }
-if(OPEN)
-LIBS <- paste(SUITESPARSE_LIB)
+
+if(SUITESPARSE_LIB != "") {
+  PKG_LIBS <- paste0(PKG_LIBS, " -L", SUITESPARSE_LIB)
+}
+
+Makevars_in <- readLines("src/Makevars.in")
+Makevars <- gsub("@PKG_INCLUDES@", PKG_INCLUDES, Makevars_in)
+Makevars <- gsub("@PKG_LIBS@", PKG_LIBS, Makevars)
+if(OS == "nowin") {
+  writeLines(Makevars, "src/Makevars")
+} else {
+  writeLines(Makevars, "src/Makevars.win")
+}
