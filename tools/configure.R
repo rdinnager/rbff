@@ -99,7 +99,7 @@ if(OS == "win") {
   } else {
     if(OPENBLAS_INCLUDE == "") {
       message("Searching for OpenBLAS...")
-      OPENBLAS_INCLUDE <- find_header("cblas.h", "OpenBLAS")
+      OPENBLAS_INCLUDE <- find_header("cblas.h", ifelse(OS == "win", "OpenBLAS", "openblas"))
         if(OPENBLAS_INCLUDE != "") {
           message(paste0("OpenBLAS found at ", OPENBLAS_INCLUDE))
         } else {
