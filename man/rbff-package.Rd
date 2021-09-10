@@ -10,7 +10,13 @@ Flatten 3D meshes into arbitrary 2D shapes using boundary first flattening
   (https://github.com/GeometryCollective/boundary-first-flattening).
 }
 \author{
-\strong{Maintainer}: Russell Dinnage \email{r.dinnage@gmail.com} (\href{https://orcid.org/0000-0003-0846-2819}{ORCID})
+\strong{Maintainer}: Russell Dinnage \email{r.dinnage@gmail.com} (\href{https://orcid.org/0000-0003-0846-2819}{ORCID}) [copyright holder]
+
+Other contributors:
+\itemize{
+  \item Rohan Sawhney \email{rohansawhney@cs.cmu.edu} [contributor, copyright holder]
+  \item Keenan Crane \email{kmcrane@cs.cmu.edu} [contributor, copyright holder]
+}
 
 }
 \keyword{internal}

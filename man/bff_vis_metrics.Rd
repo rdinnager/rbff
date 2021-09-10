@@ -6,7 +6,8 @@
 \usage{
 bff_vis_metrics(
   x,
-  metric = c("area distortion", "vertice density", "curvature", "mesh")
+  metric = c("area distortion", "vertice density", "curvature", "mesh"),
+  ...
 )
 }
 \arguments{
@@ -24,5 +25,5 @@ Visualise the result of flattening a 3d mesh.
 \examples{
 data(face)
 face_flat <- bff_flatten(face)
-bff_vis_metric(face_flat)
+bff_vis_metrics(face_flat)
 }
