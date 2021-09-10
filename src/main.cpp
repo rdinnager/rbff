@@ -1,3 +1,4 @@
+#include <Rcpp.h>
 #include "Bff.h"
 #include "MeshIO.h"
 #include "HoleFiller.h"
@@ -5,7 +6,6 @@
 #include "ConePlacement.h"
 #include "Cutter.h"
 
-#include <Rcpp.h>
 using namespace bff;
 using namespace Rcpp;
 
@@ -97,7 +97,7 @@ void flatten(Model& model, const std::vector<bool>& surfaceIsClosed,
 			  } else {
   				if (flattenToDisk) {
   					bff.flattenToDisk();
-  
+
   				} else {
   					DenseMatrix u(bff.data->bN);
   					bff.flatten(u, true);
@@ -115,19 +115,19 @@ void flattenToShape(Model& model, const std::vector<bool>& surfaceIsClosed,
   for (int i = 0; i < nMeshes; i++) {
     Mesh& mesh = model[i];
     BFF bff(mesh);
-    
+
     if (surfaceIsClosed[i]) {
           // std::cerr << "Surface is closed. Either specify nCones or mapToSphere." << std::endl;
           // exit(EXIT_FAILURE);
           stop("Surface is closed. Flattening to a target boundary is not available. Try auto_flatten instead.");
-        
+
     } else {
-        
+
           bff.flattenToShape(gamma);
-      
+
     }
   }
-      
+
 }
 
 void writeModelUVs(const std::string& outputPath, Model& model,
@@ -159,7 +159,7 @@ void auto_flatten(const std::string& inputPath,
   Model model;
   std::vector<bool> surfaceIsClosed;
   loadModel(inputPath, model, surfaceIsClosed);
-  
+
   // set nCones to 8 for closed surfaces`
   for (int i = 0; i < model.size(); i++) {
     if (surfaceIsClosed[i] && !mapToSphere && nCones < 3) {
@@ -167,13 +167,13 @@ void auto_flatten(const std::string& inputPath,
       nCones = 8;
     }
   }
-  
+
   // flatten
   flatten(model, surfaceIsClosed, nCones, flattenToDisk, mapToSphere);
-  
+
   // write model uvs to output path
   writeModelUVs(outputPath, model, surfaceIsClosed, mapToSphere, normalizeUVs);
-  
+
 }
 
 // [[Rcpp::export]]
@@ -181,22 +181,22 @@ void flatten_to_shape(const std::string& inputPath,
                      NumericMatrix boundary_shape,
                      bool normalizeUVs,
                      const std::string& outputPath) {
-  
+
   // put boundary into correct format
   int nB = boundary_shape.nrow();
   std::vector<bff::Vector> gamma(nB);
   for (int i = 0; i < nB; i++) {
-    gamma[i] = bff::Vector(boundary_shape(i, 0), boundary_shape(i, 1)); 
+    gamma[i] = bff::Vector(boundary_shape(i, 0), boundary_shape(i, 1));
   }
-    
+
   // load model
   Model model;
   std::vector<bool> surfaceIsClosed;
   loadModel(inputPath, model, surfaceIsClosed);
-  
+
   // flatten
   flattenToShape(model, surfaceIsClosed, gamma);
-  
+
   // write model uvs to output path
   bool mapToSphere = false;
   writeModelUVs(outputPath, model, surfaceIsClosed, mapToSphere, normalizeUVs);
