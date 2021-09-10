@@ -117,9 +117,9 @@ if(OS == "win") {
 
 ## Test configuration
 
-CPPFLAGS <- paste0(CPPFLAGS, 
-                   ifelse(OPENBLAS_INCLUDE != "", paste("-I", OPENBLAS_INCLUDE), ""), 
-                   ifelse(SUITESPARSE_INCLUDE != "", paste("-I", SUITESPARSE_INCLUDE), ""))
+CPPFLAGS <- paste0(CPPFLAGS,
+                  ifelse(OPENBLAS_INCLUDE != "", paste(" -I", OPENBLAS_INCLUDE), ""),
+                  ifelse(SUITESPARSE_INCLUDE != "", paste(" -I", SUITESPARSE_INCLUDE), ""))
 
 writeLines("#include <cholmod.h>", suitesparse_test <- tempfile())
 test_suitesparse <- system(paste(CC, CPPFLAGS, CFLAGS, "-E", "-xc", suitesparse_test),
