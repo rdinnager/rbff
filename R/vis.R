@@ -10,7 +10,7 @@
 #' @examples
 #' data(face)
 #' face_flat <- bff_flatten(face)
-#' bff_vis_metric(face_flat)
+#' bff_vis_metrics(face_flat)
 bff_vis_metrics <- function(x,
                             metric = c("area distortion",
                                        "vertice density",
@@ -96,6 +96,7 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
           rgl::translate3d(mesh_centre[1], mesh_centre[2], mesh_centre[3])
 
         par3d(skipRedraw = TRUE)
+        useSubscene3d(par3d("activeSubscene", dev = dev))
         rgl.pop(id = id)
         id <<- wire3d(mesh, ...)
         par3d(skipRedraw = FALSE)
@@ -111,12 +112,14 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
   move_mesh <- function(button, dev = rgl::cur3d(), subscene = rgl::currentSubscene3d(), ...) {
 
     #depth <- 0.763019
+    active <- par3d("activeSubscene", dev = dev)
 
     begin <- function(x, y) {
 
       depth <- rgl::rgl.user2window(mesh_centre[1], mesh_centre[2], 0)[1, 3]
 
-      viewport <- par3d("viewport", dev = dev, subscene = subscene)
+      active <<- par3d("activeSubscene", dev = dev)
+      viewport <- par3d("viewport", dev = dev, subscene = active)
       win_x <- x/viewport[3]
       win_y <- 1 - y/viewport[4]
 
@@ -128,6 +131,7 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
 
       par3d(skipRedraw = TRUE)
       par3d(mouseMode = c("none", "none", "none", "none", "none"))
+      useSubscene3d(active)
       rgl.pop(id = id)
       id <<- wire3d(mesh, ...)
       par3d(skipRedraw = FALSE)
@@ -151,7 +155,7 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
       mesh <<- rgl::translate3d(mesh, move[1], move[2], 0)
 
       par3d(skipRedraw = TRUE)
-
+      useSubscene3d(active)
       rgl.pop(id = id)
       id <<- wire3d(mesh, ...)
       par3d(skipRedraw = FALSE)
@@ -176,6 +180,7 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
         rgl::translate3d(mesh_centre[1], mesh_centre[2], mesh_centre[3])
       par3d(skipRedraw = TRUE)
       par3d(mouseMode = c("none", "none", "none", "none", "none"))
+      useSubscene3d(subsceneList()[1])
       rgl.pop(id = id)
       id <<- wire3d(mesh, ...)
       par3d(skipRedraw = FALSE)
@@ -188,6 +193,10 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
   }
 
   rgl::open3d()
+
+  mfrow3d(1, 2, mouseMode = "replace")
+  next3d()
+
   rgl::view3d(0, 0, zoom = 1)
   par3d(mouseMode = c("none", "none", "none", "none", "none"))
   if(!is.null(filename)) {
@@ -204,10 +213,17 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
   rotate_mesh(2, specular = "black")
 
   mesh_orig <- x$mesh_orig
-  mesh_orig$texcoords <- t(asEuclidean(t(mesh$vb))[ , 1:2] + 1) / 2
-  open3d()
-  shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
-          texminfilter = "linear.mipmap.linear", specular = "grey")
+
+  plot_texmap <- function() {
+    mesh_orig$texcoords <- t(asEuclidean(t(mesh$vb))[ , 1:2] + 1) / 2
+    shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
+            texminfilter = "linear.mipmap.linear", specular = "grey")
+  }
+
+  next3d()
+
+  plot_texmap()
+
 
 }
 
