@@ -1,10 +1,5 @@
 ---
-title: "rbff_intro"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{rbff_intro}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "Intro to rbff"
 ---
 
 ```{r, include = FALSE}
