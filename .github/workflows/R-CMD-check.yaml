@@ -70,8 +70,8 @@ jobs:
       - name: Install SuiteSparse (on Windows)
         if: runner.os == 'Windows'
         run: |
-          c:\\rtools40\\usr\\bin\\bash.exe -c pacman -Sy --noconfirm
-          c:\\rtools40\\usr\\bin\\bash.exe -c pacman -Sy --noconfirm mingw-w64-{x86_64,i686}-suitesparse
+          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm"
+          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm mingw-w64-{x86_64,i686}-suitesparse"
 
       - name: Install system dependencies
         if: runner.os == 'Linux'

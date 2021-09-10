@@ -123,7 +123,7 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
       win_x <- x/viewport[3]
       win_y <- 1 - y/viewport[4]
 
-      new_centre <- as.vector(rgl::rgl::rgl.window2user(win_x, win_y, depth))
+      new_centre <- as.vector(rgl::rgl.window2user(win_x, win_y, depth))
       move <- new_centre - mesh_centre
       mesh_centre <<- new_centre
 
