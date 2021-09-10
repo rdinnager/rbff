@@ -79,6 +79,8 @@ if(SUITESPARSE_DIR != "") {
     SUITESPARSE_INCLUDE <- find_header("cholmod.h", "suitesparse")
     if(SUITESPARSE_INCLUDE != "") {
         message(paste0("SuiteSparse found at ", SUITESPARSE_INCLUDE))
+    } else {
+      message("SuiteSparse not found.")
     }
   }
 }
@@ -98,6 +100,8 @@ if(OS == "win") {
       OPENBLAS_INCLUDE <- find_header("cblas.h", "OpenBLAS")
         if(OPENBLAS_INCLUDE != "") {
           message(paste0("OpenBLAS found at ", OPENBLAS_INCLUDE))
+        } else {
+          message("OpenBLAS not found.")
         }
     }
   }
@@ -113,19 +117,19 @@ if(OS == "win") {
 
 ## Test configuration
 
-CPPFLAGS <- paste0(CPPFLAGS, " -I", OPENBLAS_INCLUDE, " -I", SUITESPARSE_INCLUDE)
+CPPFLAGS <- paste0(CPPFLAGS, 
+                   ifelse(OPENBLAS_INCLUDE != "", paste("-I", OPENBLAS_INCLUDE), ""), 
+                   ifelse(SUITESPARSE_INCLUDE != "", paste("-I", SUITESPARSE_INCLUDE), ""))
 
 writeLines("#include <cholmod.h>", suitesparse_test <- tempfile())
-test_suitesparse <- system2(CC, c(CPPFLAGS, CFLAGS,
-                                  "-E", "-xc", suitesparse_test),
-                            stderr = TRUE)
+test_suitesparse <- system(paste(CC, CPPFLAGS, CFLAGS, "-E", "-xc", suitesparse_test),
+                            intern = TRUE)
 writeLines("#include <cblas.h>", openblas_test <- tempfile())
-test_openblas <- system2(CC, c(CPPFLAGS, CFLAGS,
-                               "-E", "-xc", openblas_test),
-                         stderr = TRUE)
+test_openblas <- system(paste(CC, CPPFLAGS, CFLAGS, "-E", "-xc", openblas_test),
+                        intern = TRUE)
 
 if(!is.null(attr(suitesparse_test, "status"))) {
-  cat("
+  message("
 ------------------------- [ANTIANTICONF] ------------------------------
 * Failed to find the suitesparse system library required for rbff:    *
 * Try installing:                                                     *
@@ -140,7 +144,7 @@ if(!is.null(attr(suitesparse_test, "status"))) {
 }
 
 if(!is.null(attr(test_openblas, "status"))) {
-  cat("
+  message("
 ------------------------- [ANTIANTICONF] ------------------------------
 * Failed to find the OpenBLAS system library required for rbff:       *
 * Try installing:                                                     *
