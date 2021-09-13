@@ -167,10 +167,12 @@ PKG_INCLUDES <- CPPFLAGS
 PKG_LIBS <- paste(pkg_l, collapse = " ")
 
 if(OPENBLAS_LIB != "") {
+  message("OPENBLAS_LIB found, setting library location to it...")
   PKG_LIBS <- paste0(PKG_LIBS, " -L", OPENBLAS_LIB)
 }
 
 if(SUITESPARSE_LIB != "") {
+  message("SUITESPARSE_LIB found, setting library location to it...")
   PKG_LIBS <- paste0(PKG_LIBS, " -L", SUITESPARSE_LIB)
 }
 

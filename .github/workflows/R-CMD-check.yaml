@@ -87,10 +87,14 @@ jobs:
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
-      - name: Set OPENBLAS_LIB on Mac
-        if: runner.os == 'macOS'
+      - name: Check (on Mac)
+        env:
+          _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          OPENBLAS_LIB: '/usr/local/opt/openblas/lib'
         run: |
-          echo "OPENBLAS_LIB=/usr/local/opt/openblas/lib" >> $GITHUB_ENV
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
+        shell: Rscript {0}
 
       - name: Check
         env:
