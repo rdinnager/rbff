@@ -63,6 +63,18 @@ bff_vis_metrics <- function(x,
 
 }
 
+#' Title
+#'
+#' @param x A `bff_flattened` object
+#' @param expression An R expression that generates an image
+#' @param filename Alternative to expression: provide the file name of a png image directly
+#' @param tile If the image does not cover the whole flattened mesh, should it be tiled
+#' (e.g repeated) so that it fills the whole mesh?
+#'
+#' @return A `bff_textured` object containing the original mesh with updated textcoords,
+#' its flattened version, and the image for texture mapping
+#'
+#' @export
 bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
 
   rotate_mesh <- function(button, dev = rgl::cur3d(), subscene = rgl::currentSubscene3d(), ...) {
@@ -96,7 +108,7 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
           rgl::translate3d(mesh_centre[1], mesh_centre[2], mesh_centre[3])
 
         rgl::par3d(skipRedraw = TRUE)
-        rgl::useSubscene3d(rgl::par3d("activeSubscene", dev = dev))
+        rgl::useSubscene3d(subs[1])
         rgl::rgl.pop(id = id)
         id <<- rgl::wire3d(mesh, ...)
         rgl::par3d(skipRedraw = FALSE)
@@ -104,22 +116,27 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
 
     }
 
+    end <- function() {
+      last_manip <<- Sys.time()
+      manip <<- TRUE
+    }
 
-    rgl::rgl.setMouseCallbacks(button, begin, update, dev = dev, subscene = subscene)
+
+    rgl::rgl.setMouseCallbacks(button, begin, update, end = end, dev = dev, subscene = subscene)
 
   }
 
   move_mesh <- function(button, dev = rgl::cur3d(), subscene = rgl::currentSubscene3d(), ...) {
 
     #depth <- 0.763019
-    active <- rgl::par3d("activeSubscene", dev = dev)
+    #active <- rgl::par3d("activeSubscene", dev = dev)
 
     begin <- function(x, y) {
 
       depth <- rgl::rgl.user2window(mesh_centre[1], mesh_centre[2], 0)[1, 3]
 
-      active <<- rgl::par3d("activeSubscene", dev = dev)
-      viewport <- rgl::par3d("viewport", dev = dev, subscene = active)
+      active <- subs[1]
+      viewport <- rgl::par3d("viewport", dev = dev, subscene = subscene)
       win_x <- x/viewport[3]
       win_y <- 1 - y/viewport[4]
 
@@ -130,12 +147,14 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
       mesh <<- rgl::translate3d(mesh, move[1], move[2], 0)
 
       rgl::par3d(skipRedraw = TRUE)
-      rgl::par3d(mouseMode = c("none", "none", "none", "none", "none"))
-      rgl::useSubscene3d(active)
+      rgl::par3d(mouseMode = c("none", "none", "none", "none", "none"),
+                 subscene = subs[1])
+      rgl::useSubscene3d(subs[1])
       rgl::rgl.pop(id = id)
       id <<- rgl::wire3d(mesh, ...)
       rgl::par3d(skipRedraw = FALSE)
-      rgl::par3d(mouseMode = c("none", "user", "user", "none", "user2"))
+      rgl::par3d(mouseMode = c("none", "user", "user", "none", "user2"),
+                 subscene = subs[1])
 
 
     }
@@ -155,14 +174,19 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
       mesh <<- rgl::translate3d(mesh, move[1], move[2], 0)
 
       rgl::par3d(skipRedraw = TRUE)
-      rgl::useSubscene3d(active)
+      rgl::useSubscene3d(subs[1])
       rgl::rgl.pop(id = id)
       id <<- rgl::wire3d(mesh, ...)
       rgl::par3d(skipRedraw = FALSE)
 
     }
 
-    rgl::rgl.setMouseCallbacks(button, begin, update, dev = dev, subscene = subscene)
+    end <- function() {
+      last_manip <<- Sys.time()
+      manip <<- TRUE
+    }
+
+    rgl::rgl.setMouseCallbacks(button, begin, update, end = end, dev = dev, subscene = subscene)
 
   }
 
@@ -179,12 +203,17 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
         rgl::scale3d(x = scale, y = scale, z = 1) %>%
         rgl::translate3d(mesh_centre[1], mesh_centre[2], mesh_centre[3])
       rgl::par3d(skipRedraw = TRUE)
-      rgl::par3d(mouseMode = c("none", "none", "none", "none", "none"))
-      rgl::useSubscene3d(rgl::subsceneList()[1])
+      rgl::par3d(mouseMode = c("none", "none", "none", "none", "none"),
+                 subscene = subs[1])
+      rgl::useSubscene3d(subs[1])
       rgl::rgl.pop(id = id)
       id <<- rgl::wire3d(mesh, ...)
       rgl::par3d(skipRedraw = FALSE)
-      rgl::par3d(mouseMode = c("none", "user", "user", "none", "user2"))
+      rgl::par3d(mouseMode = c("none", "user", "user", "none", "user2"),
+                 subscene = subs[1])
+
+      last_manip <<- Sys.time()
+      manip <<- TRUE
 
     }
 
@@ -204,7 +233,9 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
            ignoreExtent = FALSE)
   }
 
-  mesh <- x$mesh_flat %>% rgl::translate3d(0, 0, 0.01)
+  mesh <- x$mesh_flat
+  mesh$vb[1:2, ] <- rgl::asHomogeneous2((rgl::asEuclidean2(mesh$vb) - 0.5) * 2)[1:2, ]
+  mesh <- mesh %>% rgl::translate3d(0, 0, 0.01)
   id <- rgl::wire3d(mesh, specular = "black")
   mesh_centre <- find_mesh_centre(mesh)
 
@@ -214,16 +245,52 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
 
   mesh_orig <- x$mesh_orig
 
-  plot_texmap <- function() {
-    mesh_orig$texcoords <- t(rgl::asEuclidean(t(mesh$vb))[ , 1:2] + 1) / 2
-    rgl::shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
-            texminfilter = "linear.mipmap.linear", specular = "grey")
-  }
-
   rgl::next3d()
 
-  plot_texmap()
+  mesh_orig$texcoords <- t(rgl::asEuclidean(t(mesh$vb))[ , 1:2] + 1) / 2
+  mapped <- rgl::shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
+                         texminfilter = "linear.mipmap.linear", specular = "grey")
 
+  title3d("close this window when you are satisfied to save results")
+
+  subs <- rgl::subsceneList()
+  device <- rgl::cur3d()
+
+  wait_time <- 1
+  last_manip <- Sys.time()
+  device_open <- TRUE
+  manip <- TRUE
+  while(device_open) {
+
+    device_open <- any(rgl::rgl.dev.list() == device)
+
+    if(device_open) {
+      since_manip <- Sys.time() - last_manip
+
+      if((since_manip > wait_time) & manip) {
+        rgl::par3d(skipRedraw = TRUE)
+        rgl::useSubscene3d(subs[2])
+        rgl::rgl.pop(id = mapped)
+        mesh_orig$texcoords <- t(rgl::asEuclidean(t(mesh$vb))[ , 1:2] + 1) / 2
+        mapped <- rgl::shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
+                               texminfilter = "linear.mipmap.linear", specular = "grey")
+        rgl::par3d(skipRedraw = FALSE)
+        manip <- FALSE
+
+      }
+    }
+
+  }
+
+  message("Texture map complete!")
+
+  mesh_orig$texcoords <- (rgl::asEuclidean2(mesh$vb)[ , 1:2] + 1) / 2
+  mesh_flat <- mesh
+  mesh$vb <- rgl::asHomogeneous2((rgl::asEuclidean2(mesh$vb) + 1) / 2)
+
+  res <- list(mesh_flat = mesh_flat, mesh_orig = mesh_orig, texture = filename)
+  class(res) <- "bff_textured"
+  res
 
 }
 

@@ -95,7 +95,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/rbff_intro.html">rbff_intro</a>
+      <a href="../articles/articles/rbff_intro.html">Intro to rbff</a>
     </li>
   </ul>
 </li>
@@ -126,7 +126,8 @@
 
     <pre class="usage"><span class='fu'>bff_vis_metrics</span><span class='op'>(</span>
   <span class='va'>x</span>,
-  metric <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"area distortion"</span>, <span class='st'>"vertice density"</span>, <span class='st'>"curvature"</span>, <span class='st'>"mesh"</span><span class='op'>)</span>
+  metric <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"area distortion"</span>, <span class='st'>"vertice density"</span>, <span class='st'>"curvature"</span>, <span class='st'>"mesh"</span><span class='op'>)</span>,
+  <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -150,8 +151,8 @@
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>face</span><span class='op'>)</span>
 <span class='va'>face_flat</span> <span class='op'>&lt;-</span> <span class='fu'><a href='bff_flatten.html'>bff_flatten</a></span><span class='op'>(</span><span class='va'>face</span><span class='op'>)</span>
-<span class='fu'>bff_vis_metric</span><span class='op'>(</span><span class='va'>face_flat</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in bff_vis_metric(face_flat): could not find function "bff_vis_metric"</span></div></pre>
+<span class='fu'>bff_vis_metrics</span><span class='op'>(</span><span class='va'>face_flat</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in rgl::wire3d(face_flat$mesh_orig, ...): object 'face_flat' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -163,7 +164,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by .</p>
+  <p>Developed by Russell Dinnage.</p>
 </div>
 
 <div class="pkgdown">

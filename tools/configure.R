@@ -17,7 +17,7 @@ win_other_places <- suppressWarnings(normalizePath(c(paste0("C:/msys", r_arch, c
                       paste0(rtools_home, c("/mingw", "/clang"), r_arch, "/include")),
                       winslash = "/"))
 
-mac_brew_places <- c("/usr/local/Cellar")
+mac_brew_places <- c("/usr/local/opt")
 
 find_header <- function(header, subdir) {
   if(Sys.which("cpp") != "") {
@@ -47,6 +47,7 @@ find_header <- function(header, subdir) {
   paths <- c(paths, PATH)
   paths <- suppressWarnings(normalizePath(paths, winslash = "/"))
   paths <- c(file.path(paths, subdir, header),
+             file.path(paths, subdir, "include", header),
              file.path(paths, header))
 
   here <- sapply(paths, file.exists)
