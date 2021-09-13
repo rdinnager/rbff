@@ -88,26 +88,28 @@ if(SUITESPARSE_DIR != "") {
   }
 }
 
-if(OS == "win") {
-  if(OPENBLAS_DIR != "") {
-    message("OPENBLAS_DIR found, setting up directories...")
-    if(OPENBLAS_LIB == "") {
-      OPENBLAS_LIB <- file.path(OPENBLAS_DIR, "lib")
-    }
-    if(OPENBLAS_INCLUDE == "") {
-      OPENBLAS_LIB <- file.path(OPENBLAS_DIR, "include")
-    }
-  } else {
-    if(OPENBLAS_INCLUDE == "") {
-      message("Searching for OpenBLAS...")
-      OPENBLAS_INCLUDE <- find_header("cblas.h", ifelse(OS == "win", "OpenBLAS", "openblas"))
-        if(OPENBLAS_INCLUDE != "") {
-          message(paste0("OpenBLAS found at ", OPENBLAS_INCLUDE))
-        } else {
-          message("OpenBLAS not found.")
-        }
-    }
+
+if(OPENBLAS_DIR != "") {
+  message("OPENBLAS_DIR found, setting up directories...")
+  if(OPENBLAS_LIB == "") {
+    OPENBLAS_LIB <- file.path(OPENBLAS_DIR, "lib")
   }
+  if(OPENBLAS_INCLUDE == "") {
+    OPENBLAS_LIB <- file.path(OPENBLAS_DIR, "include")
+  }
+} else {
+  if(OPENBLAS_INCLUDE == "") {
+    message("Searching for OpenBLAS...")
+    OPENBLAS_INCLUDE <- find_header("cblas.h", ifelse(OS == "win", "OpenBLAS", "openblas"))
+      if(OPENBLAS_INCLUDE != "") {
+        message(paste0("OpenBLAS found at ", OPENBLAS_INCLUDE))
+      } else {
+        message("OpenBLAS not found.")
+      }
+  }
+}
+
+if(OS == "win") {
   pkg_l <- c("-lcholmod",
              "-lopenblas",
              "-lsuitesparseconfig",
