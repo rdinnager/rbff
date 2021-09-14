@@ -37,5 +37,6 @@ flatten to a particular target boundary shape, use \code{\link[=bff_flatten_to_s
 }
 \examples{
 data(face)
+options(rgl.useNULL = TRUE)
 flat_face <- bff_flatten(face)
 }

@@ -24,6 +24,8 @@ Visualise the result of flattening a 3d mesh.
 }
 \examples{
 data(face)
+## don't run the next line if you want to see the visualisation
+options(rgl.useNULL = TRUE)
 face_flat <- bff_flatten(face)
 bff_vis_metrics(face_flat)
 }
