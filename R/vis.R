@@ -3,6 +3,8 @@
 #' @param x A `bff_flattened` or `bff_sphered` object
 #' @param metric Which metric to display. One of "area distortion",
 #' "vertice density", "curvature", or "mesh"
+#' @param ... Additional arguments passed on to the drawing functions
+#' (shade3d() or wire3d())
 #'
 #' @return None.
 #' @export
@@ -48,7 +50,7 @@ bff_vis_metrics <- function(x,
             col = "white",
             ...)
   }
-  rgl::wire3d(face_flat$mesh_orig, ...)
+  rgl::wire3d(x$mesh_orig, ...)
   rgl::next3d()
   rgl::view3d(0, 0)
   rgl::par3d(mouseMode = c("none", "zAxis", "fov", "none", "pull"))
@@ -65,19 +67,20 @@ bff_vis_metrics <- function(x,
 
 }
 
-#' Title
+#' Place an image interactively on the flattened mesh and see it mapped to the
+#' original 3D mesh.
 #'
 #' @param x A `bff_flattened` object
-#' @param expression An R expression that generates an image
+#' @param expression An R expression that generates an image. *Not implemented yet*
 #' @param filename Alternative to expression: provide the file name of a png image directly
 #' @param tile If the image does not cover the whole flattened mesh, should it be tiled
-#' (e.g repeated) so that it fills the whole mesh?
+#' (e.g repeated) so that it fills the whole mesh? *Also not implemented yet*
 #'
 #' @return A `bff_textured` object containing the original mesh with updated textcoords,
 #' its flattened version, and the image for texture mapping
 #'
 #' @export
-bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
+bff_place_image <- function(x, expression, filename = NULL, tile = TRUE) {
 
   rotate_mesh <- function(button, dev = rgl::cur3d(), subscene = rgl::currentSubscene3d(), ...) {
 
@@ -253,7 +256,7 @@ bff_place_image <- function(x, expression, filename = NULL, wraparound = TRUE) {
   mapped <- rgl::shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
                          texminfilter = "linear.mipmap.linear", specular = "grey")
 
-  title3d("close this window when you are satisfied to save results")
+  rgl::title3d("close this window when you are satisfied to save results")
 
   subs <- rgl::subsceneList()
   device <- rgl::cur3d()

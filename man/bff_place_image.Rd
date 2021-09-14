@@ -2,24 +2,26 @@
 % Please edit documentation in R/vis.R
 \name{bff_place_image}
 \alias{bff_place_image}
-\title{Title}
+\title{Place an image interactively on the flattened mesh and see it mapped to the
+original 3D mesh.}
 \usage{
-bff_place_image(x, expression, filename = NULL, wraparound = TRUE)
+bff_place_image(x, expression, filename = NULL, tile = TRUE)
 }
 \arguments{
 \item{x}{A \code{bff_flattened} object}
 
-\item{expression}{An R expression that generates an image}
+\item{expression}{An R expression that generates an image. \emph{Not implemented yet}}
 
 \item{filename}{Alternative to expression: provide the file name of a png image directly}
 
 \item{tile}{If the image does not cover the whole flattened mesh, should it be tiled
-(e.g repeated) so that it fills the whole mesh?}
+(e.g repeated) so that it fills the whole mesh? \emph{Also not implemented yet}}
 }
 \value{
 A \code{bff_textured} object containing the original mesh with updated textcoords,
 its flattened version, and the image for texture mapping
 }
 \description{
-Title
+Place an image interactively on the flattened mesh and see it mapped to the
+original 3D mesh.
 }

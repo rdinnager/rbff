@@ -16,7 +16,7 @@ Authors@R:
              role = c("ctb", "cph"),
              email = "kmcrane@cs.cmu.edu"))
 Description: Flatten 3D meshes into arbitrary 2D shapes using boundary first flattening 
-  (https://github.com/GeometryCollective/boundary-first-flattening).
+  (<https://github.com/GeometryCollective/boundary-first-flattening>).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -30,12 +30,14 @@ Imports:
     sf,
     Rvcg,
     readobj,
-    colourvalues
+    colourvalues,
+    magrittr
 Suggests: 
     rmarkdown,
     knitr
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
-SystemRequirements: 
+SystemRequirements:
+    openblas,
     suitesparse

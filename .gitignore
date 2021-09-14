@@ -6,4 +6,6 @@ src/*.o
 src/*.so
 src/*.dll
 inst/doc
+src/Makevars
+src/Makevars.win
 

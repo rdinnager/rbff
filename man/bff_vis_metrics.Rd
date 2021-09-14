@@ -15,6 +15,9 @@ bff_vis_metrics(
 
 \item{metric}{Which metric to display. One of "area distortion",
 "vertice density", "curvature", or "mesh"}
+
+\item{...}{Additional arguments passed on to the drawing functions
+(shade3d() or wire3d())}
 }
 \value{
 None.
