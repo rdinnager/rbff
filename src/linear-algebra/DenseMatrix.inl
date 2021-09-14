@@ -1,8 +1,8 @@
-#ifdef __APPLE__
-#include <Accelerate/Accelerate.h>
-#else
+//#ifdef __APPLE__
+//#include <Accelerate/Accelerate.h>
+//#else
 #include <cblas.h>
-#endif
+//#endif
 
 namespace bff {
 
