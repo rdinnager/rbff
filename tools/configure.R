@@ -179,6 +179,7 @@ if(SUITESPARSE_LIB != "") {
 Makevars_in <- readLines("src/Makevars.in")
 Makevars <- gsub("@PKG_INCLUDES@", PKG_INCLUDES, Makevars_in)
 Makevars <- gsub("@PKG_LIBS@", PKG_LIBS, Makevars)
+message(Makevars)
 if(OS == "nowin") {
   writeLines(Makevars, "src/Makevars")
 } else {
