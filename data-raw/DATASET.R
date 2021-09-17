@@ -26,5 +26,5 @@ usethis::use_data(beetle,
                   teapot,
                   overwrite = TRUE)
 
-download.file("https://www.r-project.org/logo/Rlogo.png", "/inst/extdata",
+download.file("https://www.r-project.org/logo/Rlogo.png", "inst/extdata/Rlogo.png",
               mode = "wb")

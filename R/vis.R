@@ -71,16 +71,93 @@ bff_vis_metrics <- function(x,
 #' original 3D mesh.
 #'
 #' @param x A `bff_flattened` object
-#' @param expression An R expression that generates an image. *Not implemented yet*
+#' @param expression An R expression that generates an image.
 #' @param filename Alternative to expression: provide the file name of a png image directly
 #' @param tile If the image does not cover the whole flattened mesh, should it be tiled
 #' (e.g repeated) so that it fills the whole mesh? *Also not implemented yet*
+#' @param bg Background colour for if `tile = FALSE`.
+#' @param alpha_flatten Should the alpha channel be flattened? By default, parts of the mesh with
+#' completely transparent colours will be invisible. Flattening removes the alpha channel
+#' by layering the image over the `bg` colour
+#' @param ... Further arguments passed to the graphic device is `expression` is not `NULL`
 #'
 #' @return A `bff_textured` object containing the original mesh with updated textcoords,
 #' its flattened version, and the image for texture mapping
 #'
 #' @export
-bff_place_image <- function(x, expression, filename = NULL, tile = TRUE) {
+bff_place_image <- function(x, expression = NULL, filename = NULL, tile = TRUE, bg = "white",
+                            alpha_flatten = FALSE,
+                            ...) {
+
+
+  if(!is.null(expression)) {
+    if(!is.null(filename)) {
+      warning("An expression was specified, so ignoring filename...")
+    }
+    express <- substitute(expression)
+    if(requireNamespace("ragg", quietly = TRUE)) {
+      message("Using ragg for png device...")
+      filename <- tempfile(fileext = ".png")
+      ragg::agg_png(filename, ...)
+      eval(express)
+      dev.off()
+    } else {
+      filename <- tempfile(fileext = ".png")
+      png(filename, ...)
+      eval(express)
+      dev.off()
+    }
+  }
+
+  channels <- imager::load.image(filename) %>%
+    dim() %>%
+    tail(1)
+
+  if(!tile) {
+    image <- imager::load.image(filename)
+
+    w <- imager::width(image)
+    h <- imager::height(image)
+
+    x_pad <- 10 / w
+    y_pad <- 10 / h
+    x_range <- 1 - 2 * x_pad
+    y_range <- 1 - 2 * y_pad
+
+    bg_col <- as.vector(col2rgb(bg, alpha = FALSE) / 255)
+    if(tail(dim(image), 1) == 4) {
+      bg_col <- c(bg_col, 0)
+    }
+
+    filename <- tempfile(fileext = ".png")
+
+    image %>%
+      imager::pad(nPix = 10, axes = "xy", val = bg_col) %>%
+      imager::save.image(filename)
+
+    if(bg == "nearest") {
+      x_bg_low <- x_pad
+      y_bg_low <- y_pad
+      x_bg_high <- 1 - x_pad
+      y_bg_low <- 1 - y_pad
+    } else {
+      x_bg_low <- y_bg_low <- 0
+      x_bg_high <- y_bg_high <- 1
+    }
+  }
+
+  if(alpha_flatten) {
+
+    filename2 <- tempfile(fileext = ".png")
+    imager::load.image(filename) %>%
+      imager::flatten.alpha(bg = bg) %>%
+      #plot() %>%
+      imager::save.image(filename2)
+    filename <- filename2
+
+    channels <- 3
+
+  }
 
   rotate_mesh <- function(button, dev = rgl::cur3d(), subscene = rgl::currentSubscene3d(), ...) {
 
@@ -226,6 +303,12 @@ bff_place_image <- function(x, expression, filename = NULL, tile = TRUE) {
 
   }
 
+  if(channels == 4) {
+    textype <- "rgba"
+  } else {
+    textype <- "rgb"
+  }
+
   rgl::open3d()
 
   rgl::mfrow3d(1, 2, mouseMode = "replace")
@@ -253,8 +336,18 @@ bff_place_image <- function(x, expression, filename = NULL, tile = TRUE) {
   rgl::next3d()
 
   mesh_orig$texcoords <- t(rgl::asEuclidean(t(mesh$vb))[ , 1:2] + 1) / 2
-  mapped <- rgl::shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
-                         texminfilter = "linear.mipmap.linear", specular = "grey")
+  if(!tile) {
+    mesh_orig$texcoords[1, ] <- mesh_orig$texcoords[1, ] * x_range + x_pad
+    mesh_orig$texcoords[2, ] <- mesh_orig$texcoords[2, ] * y_range + y_pad
+    mesh_orig$texcoords[1, mesh_orig$texcoords[1, ] < 0] <- x_bg_low
+    mesh_orig$texcoords[1, mesh_orig$texcoords[1, ] > 1] <- x_bg_high
+    mesh_orig$texcoords[2, mesh_orig$texcoords[2, ] < 0] <- y_bg_low
+    mesh_orig$texcoords[2, mesh_orig$texcoords[2, ] > 1] <- y_bg_high
+  }
+  mapped <- rgl::shade3d(mesh_orig, col = bg, texture = filename, textype = textype,
+                         texmipmap = TRUE,
+                         texminfilter = "linear.mipmap.linear",
+                         specular = "grey")
 
   rgl::title3d("close this window when you are satisfied to save results")
 
@@ -277,7 +370,16 @@ bff_place_image <- function(x, expression, filename = NULL, tile = TRUE) {
         rgl::useSubscene3d(subs[2])
         rgl::rgl.pop(id = mapped)
         mesh_orig$texcoords <- t(rgl::asEuclidean(t(mesh$vb))[ , 1:2] + 1) / 2
-        mapped <- rgl::shade3d(mesh_orig, col = "white", texture = filename, textype = "rgb", texmipmap = TRUE,
+        if(!tile) {
+          mesh_orig$texcoords[1, ] <- mesh_orig$texcoords[1, ] * x_range + x_pad
+          mesh_orig$texcoords[2, ] <- mesh_orig$texcoords[2, ] * y_range + y_pad
+          mesh_orig$texcoords[1, mesh_orig$texcoords[1, ] < 0] <- x_bg_low
+          mesh_orig$texcoords[1, mesh_orig$texcoords[1, ] > 1] <- x_bg_high
+          mesh_orig$texcoords[2, mesh_orig$texcoords[2, ] < 0] <- y_bg_low
+          mesh_orig$texcoords[2, mesh_orig$texcoords[2, ] > 1] <- y_bg_high
+        }
+        mapped <- rgl::shade3d(mesh_orig, col = bg, texture = filename, textype = textype,
+                               texmipmap = TRUE,
                                texminfilter = "linear.mipmap.linear", specular = "grey")
         rgl::par3d(skipRedraw = FALSE)
         manip <- FALSE
@@ -290,8 +392,17 @@ bff_place_image <- function(x, expression, filename = NULL, tile = TRUE) {
   message("Texture map complete!")
 
   mesh_orig$texcoords <- (rgl::asEuclidean2(mesh$vb)[ , 1:2] + 1) / 2
+  if(!tile) {
+    mesh_orig$texcoords[1, ] <- mesh_orig$texcoords[1, ] * x_range + x_pad
+    mesh_orig$texcoords[2, ] <- mesh_orig$texcoords[2, ] * y_range + y_pad
+    mesh_orig$texcoords[1, mesh_orig$texcoords[1, ] < 0] <- x_bg_low
+    mesh_orig$texcoords[1, mesh_orig$texcoords[1, ] > 1] <- x_bg_high
+    mesh_orig$texcoords[2, mesh_orig$texcoords[2, ] < 0] <- y_bg_low
+    mesh_orig$texcoords[2, mesh_orig$texcoords[2, ] > 1] <- y_bg_high
+  }
+
   mesh_flat <- mesh
-  mesh$vb <- rgl::asHomogeneous2((rgl::asEuclidean2(mesh$vb) + 1) / 2)
+  mesh_flat$vb <- rgl::asHomogeneous2(rbind(mesh_orig$texcoords, 0))
 
   res <- list(mesh_flat = mesh_flat, mesh_orig = mesh_orig, texture = filename)
   class(res) <- "bff_textured"

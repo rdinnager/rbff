@@ -31,10 +31,12 @@ Imports:
     Rvcg,
     readobj,
     colourvalues,
-    magrittr
+    magrittr,
+    imager
 Suggests: 
     rmarkdown,
-    knitr
+    knitr,
+    ragg
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
