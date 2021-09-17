@@ -45,6 +45,6 @@ Let's try another model:
 
 ```{r bunny}
 data(bunny)
-bunny_flat <- bff_flatten(bunny, n_cones = 8)
+bunny_flat <- bff_flatten(bunny, n_cones = 16)
 bff_vis_metrics(bunny_flat, "area distortion")
 ```
