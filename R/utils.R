@@ -4,7 +4,7 @@
 #' @export
 #'
 #' @examples
-#' imager::plot(imager::load.image(r_logo_png()))
+#' plot(imager::load.image(r_logo_png()))
 r_logo_png <- function() {
   system.file("extdata/Rlogo.png", package = "rbff")
 }
