@@ -13,5 +13,5 @@ A file path to the R logo png
 Get the R logo png file path.
 }
 \examples{
-imager::plot(imager::load.image(r_logo_png()))
+plot(imager::load.image(r_logo_png()))
 }

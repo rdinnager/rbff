@@ -23,12 +23,13 @@
 #' flat_face <- bff_flatten(face)
 bff_flatten <- function(mesh, n_cones = 0, to_disk = FALSE, to_sphere = FALSE, normalise = TRUE) {
 
-  temp_obj1 <- tempfile(fileext = ".obj")
-  temp_obj2 <- tempfile(fileext = ".obj")
-
   if(!inherits(mesh, "mesh3d")) {
     stop("mesh is not a mesh3d object. bff_flatten currently only supports mesh3d objects.")
   }
+
+  temp_obj1 <- tempfile(fileext = ".obj")
+  temp_obj2 <- tempfile(fileext = ".obj")
+  on.exit(unlink(c(temp_obj1, temp_obj2)))
 
   Rvcg::vcgObjWrite(mesh, temp_obj1, writeNormals = FALSE)
 
@@ -67,5 +68,45 @@ bff_flatten <- function(mesh, n_cones = 0, to_disk = FALSE, to_sphere = FALSE, n
   }
 
   res
+
+}
+
+bff_flatten_to_shape <- function(mesh,
+                                 boundary_shape,
+                                 normalise = TRUE) {
+
+  if(!inherits(mesh, "mesh3d")) {
+    stop("mesh is not a mesh3d object. bff_flatten currently only supports mesh3d objects.")
+  }
+  if(inherits(boundary_shape, "sf")) {
+    boundary_shape <- convert_to_polygon(boundary_shape)
+  } else {
+    if(inherits(boundary_shape, "matrix") || inherits(boundary_shape, "data.frame")) {
+      if(ncol(boundary_shape) > 2) {
+        warning("boundary_shape had more than 2 columns, only the first two are being used as x and y coordinates")
+        boundary_shape <- boundary_shape[ , 1:2]
+      }
+      if(ncol(boundary_shape) < 2) {
+        stop("boundary shape does not have at least two columns and so is not a valid set of x and y coordinates")
+      }
+    }
+  } else {
+    stop("boundary_shape must be a two-column matrix or data.frame with x and y polygon coordinates, or an sf object")
+  }
+  if(!inherits(boundary_shape, "matrix") && !inherits(boundary_shape, "sf")) {
+
+  }
+
+  temp_obj1 <- tempfile(fileext = ".obj")
+  temp_obj2 <- tempfile(fileext = ".obj")
+  on.exit(unlink(c(temp_obj1, temp_obj2)))
+
+  Rvcg::vcgObjWrite(mesh, temp_obj1, writeNormals = FALSE)
+  flatten_to_shape(temp_obj1,
+                   boundary_shape,
+                   normalise,
+                   temp_obj2)
+
+  new_mesh <- readobj::read.obj(temp_obj2, convert.rgl = TRUE)[[1]]
 
 }
