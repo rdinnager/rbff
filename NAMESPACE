@@ -2,6 +2,7 @@
 
 export("%>%")
 export(bff_flatten)
+export(bff_flatten_to_shape)
 export(bff_place_image)
 export(bff_vis_metrics)
 export(r_logo_png)

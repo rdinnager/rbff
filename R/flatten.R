@@ -71,6 +71,16 @@ bff_flatten <- function(mesh, n_cones = 0, to_disk = FALSE, to_sphere = FALSE, n
 
 }
 
+#' Flatten a mesh to a particular boundary shape
+#'
+#' @param mesh
+#' @param boundary_shape
+#' @param normalise
+#'
+#' @return
+#' @export
+#'
+#' @examples
 bff_flatten_to_shape <- function(mesh,
                                  boundary_shape,
                                  normalise = TRUE) {
@@ -89,13 +99,11 @@ bff_flatten_to_shape <- function(mesh,
       if(ncol(boundary_shape) < 2) {
         stop("boundary shape does not have at least two columns and so is not a valid set of x and y coordinates")
       }
+    } else {
+      stop("boundary_shape must be a two-column matrix or data.frame with x and y polygon coordinates, or an sf object")
     }
-  } else {
-    stop("boundary_shape must be a two-column matrix or data.frame with x and y polygon coordinates, or an sf object")
   }
-  if(!inherits(boundary_shape, "matrix") && !inherits(boundary_shape, "sf")) {
 
-  }
 
   temp_obj1 <- tempfile(fileext = ".obj")
   temp_obj2 <- tempfile(fileext = ".obj")
