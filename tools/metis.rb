@@ -30,6 +30,7 @@ class Metis < Formula
     system "make", "install"
 
     pkgshare.install "graphs"
+    lib.install Dir["**/*.a"]
   end
 
   test do
