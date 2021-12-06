@@ -61,9 +61,6 @@ jobs:
         run: |
           c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm"
           c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -S --noconfirm mingw-w64-i686-suitesparse"
-          mkdir deps
-          mkdir deps/include
-          mkdir deps/lib
           robocopy C:/rtools40/mingw32/lib/ deps/lib/ libamd.a libcholmod.a libcolamd.a libsuitesparseconfig.a
           copy C:/rtools40/mingw32/lib/libopenblas.a deps/lib
           robocopy C:/rtools40/mingw32/include/ deps/include/ amd.h cholmod.h colamd.h SuiteSparse_config.h
