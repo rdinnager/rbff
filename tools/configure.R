@@ -117,7 +117,7 @@ if(OS == "win") {
              "-lamd",
              "-fopenmp")
 } else {
-  pkg_l <- c("-lcholmod", "-lsuitesparseconfig")
+  pkg_l <- c("-lcholmod")
 }
 
 if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE_BUNDLED") == "TRUE") {
@@ -125,6 +125,7 @@ if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE
   if(!grepl("linux", version$os)) {
     if (grepl("darwin", version$os)) {
       os <- "macOS"
+      pkg_l <- c("-lcholmod", "-lsuitesparseconfig" , "-lmetis")
     } else {
       if(version$arch == "x86_64") {
         os <- "Win64"
