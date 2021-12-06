@@ -184,7 +184,7 @@ jobs:
   R-CMD-check-Bundled:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: ${{ matrix.config.os }}-Bundled (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
