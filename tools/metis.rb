@@ -26,7 +26,7 @@ class Metis < Formula
   depends_on "cmake" => :build
 
   def install
-    system "make", "config", "prefix=#{prefix}", "shared=0"
+    system "make", "config", "prefix=#{prefix}"
     system "make", "install"
 
     pkgshare.install "graphs"
