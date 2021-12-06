@@ -32,7 +32,7 @@ jobs:
       - name: Install and copy static libraries (MacOS)
         if: runner.os == 'macOS'
         run: |
-          brew install ./tools/metis.rb
+          brew install --build-from-source ./tools/metis.rb
           brew install openblas
           brew install suite-sparse
           mkdir -p ./deps/lib
