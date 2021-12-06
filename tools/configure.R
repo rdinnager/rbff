@@ -131,7 +131,8 @@ if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE
                  "-lmetis",
                  "-lopenblas",
                  "-lcolamd",
-                 "-lamd")
+                 "-lamd",
+                 "-fopenmp")
     } else {
       if(version$arch == "x86_64") {
         os <- "Win64"
