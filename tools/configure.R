@@ -135,6 +135,7 @@ if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE
     url <- sprintf("https://github.com/rdinnager/rbff/releases/download/rbff_deps/rbff_deps-%s.zip",
                    os)
 
+    file <- tempfile(fileext = ".zip")
     on.exit(unlink(file), add = TRUE)
     download.file(url = url, destfile = file)
     unzip(file)
