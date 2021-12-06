@@ -13,6 +13,68 @@ on:
 name: R-CMD-check
 
 jobs:
+
+  Build-libs:
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '#build-libs')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+        matrix:
+          os: [macOS-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install and copy static libraries (MacOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install openblas
+          brew install suite-sparse
+          mkdir -p ./deps/lib
+          mkdir -p ./deps/include
+          cp /usr/local/opt/suitesparse/lib/*.a ./deps/lib
+          cp /usr/local/opt/openblas/lib/*.a ./deps/lib
+          cp /usr/local/opt/suitesparse/include/*.* ./deps/include
+          cp /usr/local/opt/openblas/include/*.* ./deps/include
+          zip -r rbff_deps-macOS.zip ./deps -x "*/\.*"
+
+      - name: Install and copy static libraries (Win64)
+        if: runner.os == 'Windows'
+        run: |
+          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm"
+          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -S --noconfirm mingw-w64-x86_64-suitesparse"
+          mkdir deps
+          mkdir deps/include
+          mkdir deps/lib
+          robocopy C:/rtools40/mingw64/lib/ deps/lib/ libamd.a libcholmod.a libcolamd.a libsuitesparseconfig.a
+          copy C:/rtools40/mingw64/lib/libopenblas.a deps/lib
+          robocopy C:/rtools40/mingw64/include/ deps/include/ amd.h cholmod.h colamd.h SuiteSparse_config.h
+          copy C:/rtools40/mingw64/include/OpenBLAS/*.* deps/include
+          7z a -tzip rbff_deps-Win64.zip deps/
+
+      - name: Install and copy static libraries (Win32)
+        if: runner.os == 'Windows'
+        run: |
+          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm"
+          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -S --noconfirm mingw-w64-i686-suitesparse"
+          mkdir deps
+          mkdir deps/include
+          mkdir deps/lib
+          robocopy C:/rtools40/mingw32/lib/ deps/lib/ libamd.a libcholmod.a libcolamd.a libsuitesparseconfig.a
+          copy C:/rtools40/mingw32/lib/libopenblas.a deps/lib
+          robocopy C:/rtools40/mingw32/include/ deps/include/ amd.h cholmod.h colamd.h SuiteSparse_config.h
+          copy C:/rtools40/mingw32/include/OpenBLAS/*.* deps/include
+          7z a -tzip rbff_deps-Win32.zip deps/
+
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./*.zip
+          overwrite: true
+          file_glob: true
+          tag: rbff_deps
+
+
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 

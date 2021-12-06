@@ -120,6 +120,33 @@ if(OS == "win") {
   pkg_l <- "-lcholmod"
 }
 
+if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE_BUNDLED") == "TRUE") {
+  message("local installation of SuiteSparse or Openblas not found or not used, downloading bundled version...")
+  if(!grepl("linux", version$os)) {
+    if (grepl("darwin", version$os)) {
+      os <- "macOS"
+    } else {
+      if(version$arch == "x86_64") {
+        os <- "Win64"
+      } else {
+        os <- "Win32"
+      }
+    }
+    url <- sprintf("https://github.com/rdinnager/rbff/releases/download/rbff_deps/rbff_deps-%s.zip",
+                   os)
+
+    on.exit(unlink(file), add = TRUE)
+    download.file(url = url, destfile = file)
+    unzip(file)
+
+    OPENBLAS_INCLUDE <- "../deps/include"
+    OPENBLAS_LIB <- "../deps/lib"
+
+  }
+
+}
+
+
 ## Test configuration
 
 CPPFLAGS <- paste0(CPPFLAGS,
