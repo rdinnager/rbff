@@ -25,6 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: 'release'
+
       - name: Install and copy static libraries (MacOS)
         if: runner.os == 'macOS'
         run: |
