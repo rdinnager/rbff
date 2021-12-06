@@ -125,6 +125,7 @@ if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE
   if(!grepl("linux", version$os)) {
     if (grepl("darwin", version$os)) {
       os <- "macOS"
+      ## brew uses metis version of suitesparse so have to copy this over too
       pkg_l <- c("-lcholmod", "-lsuitesparseconfig" , "-lmetis")
     } else {
       if(version$arch == "x86_64") {
