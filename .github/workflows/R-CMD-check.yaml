@@ -52,7 +52,7 @@ jobs:
           mkdir deps/lib
           robocopy C:/rtools40/mingw64/lib/ deps/lib/ libamd.a libcholmod.a libcolamd.a libsuitesparseconfig.a
           copy C:/rtools40/mingw64/lib/libopenblas.a deps/lib
-          robocopy C:/rtools40/mingw64/include/ deps/include/ amd.h cholmod.h colamd.h SuiteSparse_config.h
+          robocopy C:/rtools40/mingw64/include/ deps/include/ amd.h cholmod*.h colamd.h SuiteSparse_config.h
           copy C:/rtools40/mingw64/include/OpenBLAS/*.* deps/include
           7z a -tzip rbff_deps-Win64.zip deps/
 
@@ -63,7 +63,7 @@ jobs:
           c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -S --noconfirm mingw-w64-i686-suitesparse"
           robocopy C:/rtools40/mingw32/lib/ deps/lib/ libamd.a libcholmod.a libcolamd.a libsuitesparseconfig.a
           copy C:/rtools40/mingw32/lib/libopenblas.a deps/lib
-          robocopy C:/rtools40/mingw32/include/ deps/include/ amd.h cholmod.h colamd.h SuiteSparse_config.h
+          robocopy C:/rtools40/mingw32/include/ deps/include/ amd.h cholmod*.h colamd.h SuiteSparse_config.h
           copy C:/rtools40/mingw32/include/OpenBLAS/*.* deps/include
           7z a -tzip rbff_deps-Win32.zip deps/
 

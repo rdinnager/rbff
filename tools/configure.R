@@ -117,7 +117,7 @@ if(OS == "win") {
              "-lamd",
              "-fopenmp")
 } else {
-  pkg_l <- "-lcholmod"
+  pkg_l <- c("-lcholmod", "-lsuitesparseconfig")
 }
 
 if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE_BUNDLED") == "TRUE") {
@@ -142,6 +142,9 @@ if(OPENBLAS_INCLUDE == "" || SUITESPARSE_INCLUDE == "" || Sys.getenv("RBFF_FORCE
 
     OPENBLAS_INCLUDE <- "../deps/include"
     OPENBLAS_LIB <- "../deps/lib"
+
+    SUITESPARSE_INCLUDE <- ""
+    SUITESPARSE_LIB <- ""
 
   }
 
