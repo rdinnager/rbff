@@ -32,6 +32,7 @@ jobs:
       - name: Install and copy static libraries (MacOS)
         if: runner.os == 'macOS'
         run: |
+          brew install llvm
           brew install --build-from-source ./tools/metis.rb
           brew install openblas
           brew install suite-sparse
