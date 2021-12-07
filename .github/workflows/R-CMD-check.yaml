@@ -212,10 +212,11 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Install XQuartz on macOS
+      - name: Install XQuartz and llvm on macOS
         if: runner.os == 'macOS'
         run: |
           brew install xquartz --cask
+          brew install llvm
 
       - name: Query dependencies
         run: |
