@@ -32,10 +32,7 @@ jobs:
       - name: Install and copy static libraries (MacOS)
         if: runner.os == 'macOS'
         run: |
-          brew install llvm
-          brew install --build-from-source ./tools/metis.rb
-          brew install openblas
-          brew install suite-sparse
+          brew install --build-from-source ./tools/suite-sparse.rb
           mkdir -p ./deps/lib
           mkdir -p ./deps/include
           cp /usr/local/opt/suitesparse/lib/*.a ./deps/lib
@@ -212,11 +209,10 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Install XQuartz and llvm on macOS
+      - name: Install XQuartz on macOS
         if: runner.os == 'macOS'
         run: |
           brew install xquartz --cask
-          brew install llvm
 
       - name: Query dependencies
         run: |
