@@ -35,9 +35,9 @@ jobs:
           brew install --build-from-source ./tools/suite-sparse.rb
           mkdir -p ./deps/lib
           mkdir -p ./deps/include
-          cp /usr/local/opt/suitesparse/lib/*.a ./deps/lib
+          cp /usr/local/Cellar/suite-sparse/5.10.1_1/lib/*.a ./deps/lib
           cp /usr/local/opt/openblas/lib/*.a ./deps/lib
-          cp /usr/local/opt/suitesparse/include/*.* ./deps/include
+          cp /usr/local/Cellar/suite-sparse/5.10.1_1/include/*.* ./deps/include
           cp /usr/local/opt/openblas/include/*.* ./deps/include
           zip -r rbff_deps-macOS.zip ./deps -x "*/\.*"
 
