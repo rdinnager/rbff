@@ -49,6 +49,7 @@ class SuiteSparse < Formula
     ENV.deparallelize
     system "make", "library", *args
     system "make", "install", *args
+    rm Dir["**/*.dylib"]
     lib.install Dir["**/*.a"]
     pkgshare.install "KLU/Demo/klu_simple.c"
   end
