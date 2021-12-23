@@ -1,6 +1,6 @@
 # Default make file
 PKG_CPPFLAGS=@PKG_INCLUDES@ -iquote../src/linear-algebra -iquote../src/project -iquote../src/mesh -iquote../src/rectangle-bin-pack
-PKG_LIBS=@PKG_LIBS@ $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_LIBS=@PKG_LIBS@
 
 # Include all C++ files in src/ and its subdirectories:
 SOURCES=main.cpp RcppExports.cpp linear-algebra/Common.cpp mesh/Corner.cpp mesh/Edge.cpp mesh/Face.cpp mesh/HalfEdge.cpp mesh/Mesh.cpp mesh/MeshIO.cpp mesh/Vertex.cpp project/Bff.cpp project/BinPacking.cpp project/ConePlacement.cpp project/Cutter.cpp project/Distortion.cpp project/Generators.cpp project/HoleFiller.cpp rectangle-bin-pack/GuillotineBinPack.cpp rectangle-bin-pack/Rect.cpp
