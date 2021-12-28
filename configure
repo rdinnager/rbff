@@ -1,2 +1,64 @@
-#! /bin/sh
-${R_HOME}/bin${R_ARCH_BIN}/Rscript "tools/configure.R" "nowin"
+# Anticonf (tm) script by Jeroen Ooms (2021)
+# This script will query 'pkg-config' for the required cflags and ldflags.
+# If pkg-config is unavailable or does not find the library, try setting
+# INCLUDE_DIR and LIB_DIR manually via e.g:
+# R CMD INSTALL --configure-vars='INCLUDE_DIR=/.../include LIB_DIR=/.../lib'
+
+# Library settings
+PKG_NAME="suite-sparse"
+PKG_DEB_NAME="libsuitesparse-dev"
+PKG_RPM_NAME="suitesparse-devel"
+PKG_BREW_NAME="suite-sparse"
+PKG_TEST_HEADER="<cholmod.h>"
+PKG_CFLAGS="-I/usr/include/suitesparse"
+PKG_LIBS="-lcholmod"
+
+# Note that cflags may be empty in case of success
+if [ "$INCLUDE_DIR" ] || [ "$LIB_DIR" ]; then
+  echo "Found INCLUDE_DIR and/or LIB_DIR!"
+  PKG_CFLAGS="-I$INCLUDE_DIR $PKG_CFLAGS"
+  PKG_LIBS="-L$LIB_DIR $PKG_LIBS"
+elif [ `uname` = "Darwin" ]; then
+  test ! "$CI" && brew --version 2>/dev/null
+  if [ $? -eq 0 ]; then
+    BREWDIR=`brew --prefix`
+    PKG_CFLAGS="-I$BREWDIR/include"
+    PKG_LIBS="-L$BREWDIR/lib $PKG_LIBS -framework Accelerate"
+  else
+    curl -sfL "https://autobrew.github.io/scripts/suite-sparse" > autobrew
+    . ./autobrew
+  fi
+fi
+
+# For debugging
+echo "Using PKG_CFLAGS=$PKG_CFLAGS"
+echo "Using PKG_LIBS=$PKG_LIBS"
+
+# Find compiler
+CC=`${R_HOME}/bin/R CMD config CC`
+CFLAGS=`${R_HOME}/bin/R CMD config CFLAGS`
+CPPFLAGS=`${R_HOME}/bin/R CMD config CPPFLAGS`
+
+# Test configuration
+echo "#include $PKG_TEST_HEADER" | ${CC} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E -xc - >/dev/null 2>configure.log
+
+# Customize the error
+if [ $? -ne 0 ]; then
+  echo "--------------------------- [ANTICONF] --------------------------------"
+  echo "Configuration failed because $PKG_NAME was not found. Try installing:"
+  echo " * deb: $PKG_DEB_NAME (Debian, Ubuntu, etc)"
+  echo " * rpm: $PKG_RPM_NAME (Fedora, EPEL)"
+  echo " * brew: $PKG_BREW_NAME (OSX)"
+  echo "If $PKG_NAME is installed, please set INCLUDE_DIR and LIB_DIR via:"
+  echo "R CMD INSTALL --configure-vars='INCLUDE_DIR=... LIB_DIR=...'"
+  echo "-------------------------- [ERROR MESSAGE] ---------------------------"
+  cat configure.log
+  echo "--------------------------------------------------------------------"
+  exit 1
+fi
+
+# Write to Makevars
+sed -e "s|@PKG_INCLUDES@|$PKG_CFLAGS|" -e "s|@PKG_LIBS@|$PKG_LIBS|" src/Makevars.in > src/Makevars
+
+# Success
+exit 0

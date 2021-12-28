@@ -1,81 +1,12 @@
-# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
-# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
-#
+# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches:
-      - main
-      - master
   pull_request:
-    branches:
-      - main
-      - master
 
 name: R-CMD-check
 
 jobs:
-
-  Build-libs:
-    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '#build-libs')
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macOS-latest, windows-latest]
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: r-lib/actions/setup-r@v1
-        with:
-          r-version: 'release'
-
-      - name: Install and copy static libraries (MacOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install --build-from-source ./tools/suite-sparse.rb
-          mkdir -p ./deps/lib
-          mkdir -p ./deps/include
-          cp /usr/local/Cellar/suite-sparse/5.10.1_1/lib/*.a ./deps/lib
-          cp /usr/local/opt/openblas/lib/*.a ./deps/lib
-          cp /usr/local/Cellar/suite-sparse/5.10.1_1/include/*.* ./deps/include
-          cp /usr/local/opt/openblas/include/*.* ./deps/include
-          zip -r rbff_deps-macOS.zip ./deps -x "*/\.*"
-
-      - name: Install and copy static libraries (Win64)
-        if: runner.os == 'Windows'
-        run: |
-          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm"
-          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -S --noconfirm mingw-w64-x86_64-suitesparse"
-          mkdir deps
-          mkdir deps/include
-          mkdir deps/lib
-          robocopy C:/rtools40/mingw64/lib/ deps/lib/ libamd.a libcholmod.a libcolamd.a libsuitesparseconfig.a
-          copy C:/rtools40/mingw64/lib/libopenblas.a deps/lib
-          robocopy C:/rtools40/mingw64/include/ deps/include/ amd.h cholmod*.h colamd.h SuiteSparse_config.h
-          copy C:/rtools40/mingw64/include/OpenBLAS/*.* deps/include
-          7z a -tzip rbff_deps-Win64.zip deps/
-
-      - name: Install and copy static libraries (Win32)
-        if: runner.os == 'Windows'
-        run: |
-          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm"
-          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -S --noconfirm mingw-w64-i686-suitesparse"
-          robocopy C:/rtools40/mingw32/lib/ deps/lib/ libamd.a libcholmod.a libcolamd.a libsuitesparseconfig.a
-          copy C:/rtools40/mingw32/lib/libopenblas.a deps/lib
-          robocopy C:/rtools40/mingw32/include/ deps/include/ amd.h cholmod*.h colamd.h SuiteSparse_config.h
-          copy C:/rtools40/mingw32/include/OpenBLAS/*.* deps/include
-          7z a -tzip rbff_deps-Win32.zip deps/
-
-      - uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./*.zip
-          overwrite: true
-          file_glob: true
-          tag: rbff_deps
-
-
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
@@ -85,185 +16,40 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest, r: 'release'}
+          - {os: macOS-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", http-user-agent: "R/4.1.0 (ubuntu-20.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
+          - {os: windows-2022,   r: 'devel'}
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,   r: 'release'}
+          - {os: ubuntu-latest,   r: 'oldrel-1'}
 
     env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
 
     steps:
       - uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-pandoc@v2
+      
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsuitesparse-dev
+          
+      - if: runner.os == 'macOS'
+        run: brew install --cask xquartz
+
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
 
-      - uses: r-lib/actions/setup-pandoc@v1
-
-      - name: Install XQuartz on macOS
-        if: runner.os == 'macOS'
-        run: |
-          brew install xquartz --cask
-
-      - name: Query dependencies
-        run: |
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
-
-      - name: Restore R package cache
-        uses: actions/cache@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+          extra-packages: rcmdcheck
 
-      - name: Install SuiteSparse (on linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt install libopenblas-dev
-          sudo apt install libsuitesparse-dev
-
-      - name: Install SuiteSparse (on macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install openblas
-          brew install suite-sparse
-
-      - name: Install SuiteSparse (on Windows)
-        if: runner.os == 'Windows'
-        run: |
-          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -Sy --noconfirm"
-          c:\\rtools40\\usr\\bin\\bash.exe -c "pacman -S --noconfirm mingw-w64-{x86_64,i686}-suitesparse"
-
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          while read -r cmd
-          do
-            eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
-
-      - name: Install dependencies
-        run: |
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
-        shell: Rscript {0}
-
-      - name: Check (on Mac)
-        if: runner.os == 'macOS'
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-          OPENBLAS_LIB: '/usr/local/opt/openblas/lib'
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
-        shell: Rscript {0}
-
-      - name: Check
-        if: runner.os != 'macOS'
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
-        shell: Rscript {0}
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
+      - uses: r-lib/actions/check-r-package@v2
         with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
-
-  R-CMD-check-Bundled:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }}-Bundled (${{ matrix.config.r }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: macOS-latest, r: 'release'}
-          - {os: macOS-latest, r: 'devel'}
-          - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: 'devel'}
-
-    env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: r-lib/actions/setup-r@v1
-        with:
-          r-version: ${{ matrix.config.r }}
-
-      - uses: r-lib/actions/setup-pandoc@v1
-
-      - name: Install XQuartz on macOS
-        if: runner.os == 'macOS'
-        run: |
-          brew install xquartz --cask
-
-      - name: Query dependencies
-        run: |
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
-
-      - name: Restore R package cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
-
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          while read -r cmd
-          do
-            eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
-
-      - name: Install dependencies
-        run: |
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
-        shell: Rscript {0}
-
-      - name: Check (on Mac)
-        if: runner.os == 'macOS'
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-          OPENBLAS_LIB: '/usr/local/opt/openblas/lib'
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
-        shell: Rscript {0}
-
-      - name: Check
-        if: runner.os != 'macOS'
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
-        shell: Rscript {0}
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
+          error-on: '"error"'

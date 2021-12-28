@@ -1,3 +1,4 @@
+#include "Mesh.h"
 #include "BinPacking.h"
 #include "Rect.h"
 #include "GuillotineBinPack.h"

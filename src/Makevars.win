@@ -1,6 +1,7 @@
-# Default make file
-PKG_CPPFLAGS=@PKG_INCLUDES@ -iquote../src/linear-algebra -iquote../src/project -iquote../src/mesh -iquote../src/rectangle-bin-pack
-PKG_LIBS=@PKG_LIBS@
+VERSION = 5.10.1
+RWINLIB = ../windows/suitesparse-$(VERSION)
+PKG_CPPFLAGS=-I$(RWINLIB)/include -I$(RWINLIB)/include/OpenBLAS -iquote../src/linear-algebra -iquote../src/project -iquote../src/mesh -iquote../src/rectangle-bin-pack
+PKG_LIBS= -L$(RWINLIB)/lib${R_ARCH}${CRT} -lcholmod -lopenblas -lsuitesparseconfig -lcolamd -lamd -fopenmp
 
 # Include all C++ files in src/ and its subdirectories:
 SOURCES=main.cpp RcppExports.cpp linear-algebra/Common.cpp mesh/Corner.cpp mesh/Edge.cpp mesh/Face.cpp mesh/HalfEdge.cpp mesh/Mesh.cpp mesh/MeshIO.cpp mesh/Vertex.cpp project/Bff.cpp project/BinPacking.cpp project/ConePlacement.cpp project/Cutter.cpp project/Distortion.cpp project/Generators.cpp project/HoleFiller.cpp rectangle-bin-pack/GuillotineBinPack.cpp rectangle-bin-pack/Rect.cpp
@@ -8,9 +9,10 @@ SOURCES=main.cpp RcppExports.cpp linear-algebra/Common.cpp mesh/Corner.cpp mesh/
 # Obtain the object files
 OBJECTS=$(SOURCES:.cpp=.o)
 
-# Make the shared object
-all: $(SHLIB)
+all: clean winlibs
 
-# Provide recipe to remove all objects
+winlibs:
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R" $(VERSION)
+
 clean:
-	@rm -f $(OBJECTS)
+	rm -f $(SHLIB) $(OBJECTS)
