@@ -1,6 +1,4 @@
 # Anticonf (tm) script by Jeroen Ooms (2021)
-# This script will query 'pkg-config' for the required cflags and ldflags.
-# If pkg-config is unavailable or does not find the library, try setting
 # INCLUDE_DIR and LIB_DIR manually via e.g:
 # R CMD INSTALL --configure-vars='INCLUDE_DIR=/.../include LIB_DIR=/.../lib'
 
@@ -10,7 +8,7 @@ PKG_DEB_NAME="libsuitesparse-dev"
 PKG_RPM_NAME="suitesparse-devel"
 PKG_BREW_NAME="suite-sparse"
 PKG_TEST_HEADER="<cholmod.h>"
-PKG_CFLAGS="-I/usr/include/suitesparse"
+PKG_CFLAGS="-I/usr/include/suitesparse -I/usr/include/openblas"
 PKG_LIBS="-lcholmod"
 
 # Note that cflags may be empty in case of success
