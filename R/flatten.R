@@ -73,19 +73,35 @@ bff_flatten <- function(mesh, n_cones = 0, to_disk = FALSE, to_sphere = FALSE, n
 
 #' Flatten a mesh to a particular boundary shape
 #'
-#' @param mesh
-#' @param boundary_shape
-#' @param normalise
+#' @param mesh `mesh3d` object to flatten. Can also be a two-column `data.frame`
+#' or `matrix` with 2d coordinates, or an `sf` object representing a polygon,
+#' in which case it will be converted to a mesh, and then flattened (but since
+#' it is already flat, this will be a mapping of one shape to another instead).
+#' @param boundary_shape A two-column `data.frame` or `matrix` with 2d coordinates,
+#' or an `sf` object representing a polygon. The shape to be flattened to.
+#' @param normalise Should the 2d mapping be normalised between 0 and 1 on the x and y axes?
 #'
-#' @return
+#' @return A `bff_flattened` object containing the original mesh and its flattened version with
+#' corresponding vertices.
 #' @export
 #'
 #' @examples
+#' data(face)
+#' options(rgl.useNULL = TRUE)
+#' flat_face <- bff_flatten_to_shape(face, matrix(c(0, 1, 1, 0, 0,
+#'                                                  0, 0, 1, 1, 0),
+#'                                                ncol = 2))
 bff_flatten_to_shape <- function(mesh,
                                  boundary_shape,
                                  normalise = TRUE) {
 
   if(!inherits(mesh, "mesh3d")) {
+    if(inherits("sf")) {
+      if(!requireNamespace("sfdct", quietly = TRUE)) {
+        stop('Using a 2d polygon as an argument to mesh requires the sfdct package.
+You can install it using install.packages("sfdct")')
+      }
+    }
     stop("mesh is not a mesh3d object. bff_flatten currently only supports mesh3d objects.")
   }
   if(inherits(boundary_shape, "sf")) {
@@ -116,5 +132,14 @@ bff_flatten_to_shape <- function(mesh,
                    temp_obj2)
 
   new_mesh <- readobj::read.obj(temp_obj2, convert.rgl = TRUE)[[1]]
+
+  flat_mesh <- rgl::mesh3d(cbind(t(new_mesh$texcoords), 0),
+                           triangles = new_mesh$it)
+  res <- list(mesh_orig = new_mesh,
+              mesh_flat = flat_mesh)
+
+  class(res) <- "bff_flattened"
+
+  res
 
 }

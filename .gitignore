@@ -9,4 +9,5 @@ inst/doc
 src/Makevars
 src/Makevars.win
 deps
+windows
 

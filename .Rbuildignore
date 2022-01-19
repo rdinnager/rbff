@@ -9,3 +9,5 @@
 ^vignettes/articles$
 ^extdata$
 ^deps$
+^cran-comments\.md$
+^windows$

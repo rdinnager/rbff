@@ -16,6 +16,10 @@ Welcome to the `rbff` R package. `rbff` is an R wrapper around the [boundary-fir
 ```{r setup}
 library(rbff)
 library(rgl)
+library(rnaturalearth)
+library(sf)
+library(dplyr)
+library(rmapshaper)
 
 data(face)
 
@@ -47,4 +51,39 @@ Let's try another model:
 data(bunny)
 bunny_flat <- bff_flatten(bunny, n_cones = 16)
 bff_vis_metrics(bunny_flat, "area distortion")
+```
+
+We used 16 'cones' to reduce distortion in flattening the bunny. Cones are cuts through the mesh that are made before flattening. Where the cones are placed is determined automatically by an algorithm designed to minimize distortion.
+
+## Flattening to a Particular Shape
+
+Instead of having the boundary of the flattened mesh be chosen automatically to minimize distortion, we can specify a particular boundary shape that we want the mesh to be flattened onto. This shape can be specified as a two-column matrix with coordinates that form a polygon, or it can be specified as an `sf` object storing a polygon (or anything that can be coerced to it). An `sf` object is a format designed for geographic shapes, so may have projection information. This information is ignored by `rbff`, which assumed planar geometry. But `sf` is a convenient format because the `sf` package has many functions for manipulating geometry efficiently. Let's get the coastline of Australia, and try flattening our 3d face onto it!
+
+```{r get_oz}
+oz <- ne_states("Australia", returnclass = "sf")
+## just mainland (sorry Tassie)
+oz <- oz %>%
+  filter(name %in% c("Western Australia", "Northern Territory",
+                     "South Australia", "Queensland", "New South Wales",
+                     "Victoria", "Australian Capital Territory"))
+oz <- st_union(oz)
+## remove small islands
+oz <- st_cast(oz, "POLYGON") %>% 
+  st_as_sf() %>%
+  mutate(area = st_area(x)) %>%
+  top_n(1)
+
+plot(oz$x)
+
+## simplify it a bit
+oz <- ms_simplify(oz$x) %>%
+  st_as_sf()
+
+plot(oz)
+
+```
+
+```{r flatten_to_shape}
+oz_face <- bff_flatten_to_shape(face, oz)
+bff_vis_metrics(oz_face, "mesh")
 ```
